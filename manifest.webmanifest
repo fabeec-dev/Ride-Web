@@ -1,0 +1,12 @@
+{
+  "name": "Ride",
+  "short_name": "Ride",
+  "description": "Copilote scooter : balades GPS, Spotify et historique.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06080d",
+  "theme_color": "#080b12",
+  "orientation": "portrait",
+  "icons": [{"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
