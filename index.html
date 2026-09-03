@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#080b12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ride" />
+  <title>Ride</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <button class="brand" data-go="home" aria-label="Accueil Ride">
+        <span class="brand-mark">R</span>
+        <span>Ride</span>
+      </button>
+      <div class="top-actions">
+        <span id="connectionChip" class="chip"><span class="dot"></span>PWA</span>
+        <button id="settingsBtn" class="icon-btn" aria-label="Réglages">⚙︎</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="home" class="screen active">
+        <div class="hero glass">
+          <div>
+            <p class="eyebrow">TON COPILOTE SCOOTER</p>
+            <h1>Prêt pour une balade ?</h1>
+            <p class="muted">GPS, musique et historique dans une seule app.</p>
+          </div>
+          <button id="startRideHero" class="primary big">Démarrer une balade</button>
+        </div>
+
+        <div class="quick-grid">
+          <button class="quick-card glass" data-go="music">
+            <span class="quick-icon">♫</span>
+            <strong>Spotify</strong>
+            <small id="spotifyQuickStatus">Non connecté</small>
+          </button>
+          <button class="quick-card glass" data-go="history">
+            <span class="quick-icon">↻</span>
+            <strong>Historique</strong>
+            <small id="historyQuickStatus">Aucune balade</small>
+          </button>
+          <button class="quick-card glass" data-go="plan">
+            <span class="quick-icon">⌁</span>
+            <strong>Planifier</strong>
+            <small>Durée & ambiance</small>
+          </button>
+          <button id="installHelpBtn" class="quick-card glass">
+            <span class="quick-icon">⬆</span>
+            <strong>Installer</strong>
+            <small>Écran d’accueil</small>
+          </button>
+        </div>
+
+        <div class="section-title"><h2>Aujourd’hui</h2><span id="todayDate"></span></div>
+        <div class="stats-row">
+          <div class="stat glass"><strong id="todayDistance">0.0</strong><span>km</span><small>Distance</small></div>
+          <div class="stat glass"><strong id="todayMinutes">0</strong><span>min</span><small>En balade</small></div>
+          <div class="stat glass"><strong id="todayRides">0</strong><span></span><small>Balades</small></div>
+        </div>
+
+        <div class="now-card glass" data-go="music">
+          <div id="homeCover" class="cover placeholder">♫</div>
+          <div class="now-copy">
+            <small>EN CE MOMENT</small>
+            <strong id="homeTrack">Connecte Spotify</strong>
+            <span id="homeArtist">Ride suivra ta musique ici</span>
+          </div>
+          <span class="chevron">›</span>
+        </div>
+      </section>
+
+      <section id="ride" class="screen">
+        <div class="screen-head">
+          <div><p class="eyebrow">BALADE EN COURS</p><h1 id="rideTitle">Prêt à partir</h1></div>
+          <span id="gpsChip" class="chip neutral">GPS en attente</span>
+        </div>
+        <div id="map" class="map-card"></div>
+        <div class="ride-stats glass">
+          <div><strong id="rideTime">00:00</strong><small>Durée</small></div>
+          <div><strong id="rideDistance">0.00 km</strong><small>Distance</small></div>
+          <div><strong id="rideSpeed">0 km/h</strong><small>Vitesse</small></div>
+        </div>
+        <div class="ride-actions">
+          <button id="startRideBtn" class="primary">Démarrer</button>
+          <button id="centerMapBtn" class="secondary">Me recentrer</button>
+          <button id="endRideBtn" class="danger hidden">Terminer</button>
+        </div>
+        <p class="warning-note">Sur iPhone, une Web App ne garantit pas le suivi GPS continu quand l’écran est verrouillé.</p>
+      </section>
+
+      <section id="plan" class="screen">
+        <div class="screen-head"><div><p class="eyebrow">PLANIFIER</p><h1>Ta prochaine balade</h1></div></div>
+        <div class="planner glass">
+          <label>Durée souhaitée
+            <div class="segmented" id="durationSegments">
+              <button data-duration="30">30 min</button><button data-duration="60" class="selected">1 h</button><button data-duration="120">2 h</button>
+            </div>
+          </label>
+          <label>Ambiance
+            <div class="segmented" id="moodSegments">
+              <button data-mood="calme">Calme</button><button data-mood="mix" class="selected">Mix</button><button data-mood="energie">Énergie</button>
+            </div>
+          </label>
+          <label class="switch-row"><span>Retour au point de départ</span><input id="returnToggle" type="checkbox" checked /></label>
+          <div class="plan-preview">
+            <span class="route-orb">⌁</span>
+            <div><strong id="planSummary">Balade de 1 h · Mix</strong><small>Le trajet réel sera enregistré dès le départ.</small></div>
+          </div>
+          <button id="launchPlanBtn" class="primary big">Lancer cette balade</button>
+        </div>
+      </section>
+
+      <section id="music" class="screen">
+        <div class="screen-head">
+          <div><p class="eyebrow">MUSIQUE INTELLIGENTE</p><h1>Ride DJ</h1></div>
+          <button id="spotifyConnectBtn" class="spotify-btn">Connecter Spotify</button>
+        </div>
+        <div class="player glass">
+          <div id="musicCover" class="cover large placeholder">♫</div>
+          <div class="track-meta">
+            <small>LECTURE SPOTIFY</small>
+            <h2 id="musicTrack">Aucun morceau</h2>
+            <p id="musicArtist">Connecte ton compte Spotify</p>
+          </div>
+          <div class="player-controls">
+            <button id="prevBtn" class="round-btn">‹‹</button>
+            <button id="playPauseBtn" class="play-btn">▶</button>
+            <button id="nextBtn" class="round-btn">››</button>
+          </div>
+          <small id="spotifyDevice" class="center muted">Aucun appareil Spotify détecté</small>
+        </div>
+        <div class="section-title"><h2>Ce que Ride apprend</h2><span>Localement</span></div>
+        <div class="learning-grid">
+          <div class="glass insight"><span>↪</span><strong id="skipCount">0</strong><small>skips via Ride</small></div>
+          <div class="glass insight"><span>♥</span><strong id="fullPlayCount">0</strong><small>lectures observées</small></div>
+          <div class="glass insight wide"><span>◷</span><div><strong id="favoritePeriod">Pas encore assez de données</strong><small>Moment où tu écoutes le plus</small></div></div>
+        </div>
+      </section>
+
+      <section id="history" class="screen">
+        <div class="screen-head"><div><p class="eyebrow">HISTORIQUE</p><h1>Tes balades</h1></div><button id="clearHistoryBtn" class="text-btn">Effacer</button></div>
+        <div id="historyList" class="history-list"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button data-go="home" class="active"><span>⌂</span><small>Accueil</small></button>
+      <button data-go="ride"><span>◎</span><small>Balade</small></button>
+      <button data-go="plan"><span>⌁</span><small>Planifier</small></button>
+      <button data-go="music"><span>♫</span><small>Musique</small></button>
+      <button data-go="history"><span>↻</span><small>Historique</small></button>
+    </nav>
+  </div>
+
+  <div id="modalBackdrop" class="modal-backdrop hidden">
+    <div class="modal glass">
+      <div class="modal-head"><h2 id="modalTitle">Réglages</h2><button id="modalClose" class="icon-btn">×</button></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="./app.js" defer></script>
+</body>
+</html>
